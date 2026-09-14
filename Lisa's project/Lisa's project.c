@@ -409,8 +409,8 @@ void print_calendar_list_console(list* head)
 {
 	if (head == NULL)
 	{
-		printf("Shift schedule is not exit.\n");
-		exit(1);
+		printf("Shift Schedule is not exit.\n");
+		return;
 	}
 
 	//建立標題
@@ -781,10 +781,10 @@ void total_working_days_calculate(list* head)
 				dm_working_days[i] ++;
 
 			else if (strcmp(current->ES_DM, dm_all[i]) == 0)
-				dm_working_hours[i] ++;
+				dm_working_days[i] ++;
 
 			else if (strcmp(current->NS_DM, dm_all[i]) == 0)
-				dm_working_hours[i] ++;
+				dm_working_days[i] ++;
 		}
 
 		//EMPLOYEE工時
@@ -841,15 +841,15 @@ void total_working_hours_print(list* head)
 	int i;
 	for (i = 0; i < DM_NUMS; i++)
 	{
-		printf("DM ==>%7s  %.1f hours = %3d days\n"
+		printf("DM ==>%7s  %.1f hours => %3d days\n"
 			, dm_all[i]
 			, dm_working_hours[i]
 			, dm_working_days[i]);
-		printf("B  ==>%7s  %.1f hours = %3d days\n"
+		printf("B  ==>%7s  %.1f hours => %3d days\n"
 			, employee_all[2 * i]
 			, employee_working_hours[2 * i]
 			, employee_working_days[2 * i]);
-		printf("H  ==>%7s  %.1f hours = %3d days\n"
+		printf("H  ==>%7s  %.1f hours => %3d days\n"
 			, employee_all[2 * i + 1]
 			, employee_working_hours[2 * i + 1]
 			, employee_working_days[2 * i + 1]);
@@ -859,10 +859,17 @@ void total_working_hours_print(list* head)
 
 void leave_system(list* head)
 {
+	if (head == NULL)
+	{
+		printf("尚未生成班表，請先生成班表後再操作。\n");
+		return;
+	}
+
 	int leave_day = 1;
 	list* current = head;
 	int mode_index;
 	int leave_index;
+
 	while (leave_day != 0)
 	{
 		printf("請輸入請假日期(5號，則輸入 5；結束請假系統請輸入 0 )：\n");
