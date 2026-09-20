@@ -11,6 +11,7 @@
 #define WORK_DAY_MAX 6					//最多連續做幾天
 #define EMPTY_DAY 0						//月曆中空白日的賦值
 #define SHIFT_NUMS 3					//班別(早班午班晚班)
+#define	PARTS_NUMS 3						//工作位置(DM, HCl, B)
 #define NAME_LEN 15						//員工名字長度限制
 #define working_hours_per_day 8.0		//一日工時
 
@@ -144,6 +145,10 @@ void working_days_zero();
 
 void check_delete_head(list* head);
 
+//test zone
+void file_open(list* head);
+
+
 int main()
 {
 	//宣告變數
@@ -166,6 +171,65 @@ int main()
 	//system("pause");
 
 	return 0;
+}
+
+void file_open(list* head)
+{
+	FILE* fptr = fopen("Shift schedule.csv", "w");
+	if (fptr == 1)
+	{
+		printf("The file cannot be opened.\n");
+		return 1;
+	}
+
+	if (head == NULL)
+	{
+		printf("The schedule has not been generated yet. \n");
+		return 1;
+	}
+
+	list* current = head;
+	int i, j;
+	//第一行
+	fprintf(fptr, "Date,week,,,%s,,,%s,,,%s,,,Day off,,,Leave\n",shift[0], shift[1], shift[2]);
+	//第二行
+	for (i = 0; i < (SHIFT_NUMS + 2); i++)//+2為多列印Day off和Leave
+	{
+		if(i == 0)
+			fprintf(fptr, ",");
+
+		for (j = 0; j < PARTS_NUMS; j++)
+		{
+			fprintf(fptr, ",%s", parts[j]);
+		}
+	}
+	fprintf(fptr, "\n");
+	//第三行到結束
+	while (current != NULL)
+	{
+		fprintf(fptr, "%d/%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+			current->month,
+			current->day,
+			current->week,
+			current->DS_DM,
+			current->DS_B,
+			current->DS_H,
+			current->ES_DM,
+			current->ES_B,
+			current->ES_H,
+			current->NS_DM,
+			current->NS_B,
+			current->NS_H,
+			current->DO_DM,
+			current->DO_B,
+			current->DO_H,
+			current->LEAVE_DM,
+			current->LEAVE_B,
+			current->LEAVE_H);
+		current = current->next;
+	}
+
+	fclose(fptr);
 }
 
 void receive_data(int* year, int* month, int* ds_dm_index, int* ds_dm_workday)
@@ -651,9 +715,10 @@ void working_hours_daily(list* head)
 void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds_dm_workday)
 {
 	int mode;
+	printf("**** 歡迎進入熊熊班表系統 ****\n\n");
 	while (1)
 	{
-		printf("操作系統選擇：[0]=>快速生成下個月班表   [1]請假系統   [2]列印特定班表   [3]列印工時表   [4]結束\n");
+		printf("操作系統選擇：[0]=>快速生成下個月班表   [1]請假系統   [2]列印特定班表   [3]列印工時表   [4]輸出班表   [5]結束\n");
 		printf("==> ");
 		scanf("%d", &mode);
 		printf("\n\n");
@@ -708,7 +773,14 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 			working_days_zero();
 			continue;
 		}
+
 		case(4):
+		{
+			printf("****** 輸出班表 ******\n");
+			file_open(head);
+			continue;
+		}
+		case(5):
 		{
 			printf("****** 結束 ******\n");
 			break;
@@ -719,7 +791,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 			continue;
 		}
 		}
-		if (mode == 4)
+		if (mode == 5)
 			break;
 	}
 }
