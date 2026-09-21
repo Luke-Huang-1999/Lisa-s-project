@@ -145,7 +145,7 @@ void working_days_zero();
 
 void check_delete_head(list* head);
 
-//test zone
+//()開啟檔案(list型態的首區塊指標)
 void file_open(list* head);
 
 
@@ -1315,3 +1315,4 @@ void check_delete_head(list* head)
 		head = NULL;
 	}
 }
+
