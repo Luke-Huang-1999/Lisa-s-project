@@ -11,7 +11,7 @@
 #define WORK_DAY_MAX 6					//最多連續做幾天
 #define EMPTY_DAY 0						//月曆中空白日的賦值
 #define SHIFT_NUMS 3					//班別(早班午班晚班)
-#define	PARTS_NUMS 3						//工作位置(DM, HCl, B)
+#define	PARTS_NUMS 3					//工作位置(DM, HCl, B)
 #define NAME_LEN 15						//員工名字長度限制
 #define working_hours_per_day 8.0		//一日工時
 
@@ -151,6 +151,7 @@ void file_open(list* head);
 
 void schedule_to_csv(list* head,FILE* fptr);
 void timesheet_to_csv(list* head, FILE* fptr);
+//void open_to_windows();
 
 int main()
 {
@@ -194,10 +195,17 @@ void file_open(list* head)
 	//將班表輸出至csv檔
 	schedule_to_csv(head, fptr);
 	
-	//工時表輸出至csv檔
-	
+	//間隔兩行
+	fprintf(fptr, "\n\n");
 
+	//工時表輸出至csv檔
+	timesheet_to_csv(head, fptr);
+
+	//檔案關閉，建立良好習慣^^
 	fclose(fptr);
+
+	//開啟csv檔
+	system("start \"\" \"Shift schedule.csv\"");
 }
 
 void schedule_to_csv(list* head, FILE* fptr)
@@ -246,6 +254,31 @@ void schedule_to_csv(list* head, FILE* fptr)
 
 void timesheet_to_csv(list* head, FILE* fptr)
 {
+	//計算不含請假人員工時
+	total_working_hours_calculate(head);
+	//加班人員工時新增
+	handle_leave_replacement(head);
+	//工作天數計算
+	total_working_days_calculate(head);
+
+	//第一行
+	fprintf(fptr, ",%s,%s\n", "工時", "工作天數");
+	//第二行
+	fprintf(fptr, ",%s,%s\n", "小時", "天");
+	//列印資料
+	int i;
+	for (i = 0; i < DM_NUMS; i++)
+	{
+		//主管
+		fprintf(fptr, "%s,%3.1f,%d\n", dm_all[i], dm_working_hours[i], dm_working_days[i]);
+		//Brine
+		fprintf(fptr, "%s,%3.1f,%d\n", employee_all[2 * i], employee_working_hours[2 * i], employee_working_days[2 * i]);
+		//HCl
+		fprintf(fptr, "%s,%3.1f,%d\n", employee_all[2 * i + 1], employee_working_hours[2 * i + 1], employee_working_days[2 * i + 1]);
+		//間隔
+		fprintf(fptr, "\n");
+	}
+	
 
 }
 
@@ -490,7 +523,7 @@ void print_calendar_list_console(list* head)
 {
 	if (head == NULL)
 	{
-		printf("Shift Schedule is not exit.\n");
+		printf("ERROR MESSAGE::Shift Schedule is not exit.\n");
 		return;
 	}
 
@@ -524,7 +557,7 @@ void print_calendar_list_console(list* head)
 		//指標移動
 		current = current->next;
 	}
-	printf("\n\n");
+	printf("班表列印完成...\n\n");
 }
 
 int month_days(int year, int month)
@@ -732,18 +765,24 @@ void working_hours_daily(list* head)
 void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds_dm_workday)
 {
 	int mode;
-	printf("**** 歡迎進入熊熊班表系統 ****\n\n");
+	printf("歡迎進入熊熊班表系統 版本號:1.0\n\n");
 	while (1)
 	{
-		printf("操作系統選擇：[0]=>快速生成下個月班表   [1]請假系統   [2]列印特定班表   [3]列印工時表   [4]輸出班表   [5]結束\n");
-		printf("==> ");
+		printf(" 操作命令表：\n");
+		printf(" [0]快速生成下個月班表\n");
+		printf(" [1]請假系統\n");
+		printf(" [2]列印特定班表\n");
+		printf(" [3]列印工時表\n");
+		printf(" [4]輸出班表\n");
+		printf(" [5]結束\n\n");
+		printf("請選擇操作指令：");
 		scanf("%d", &mode);
-		printf("\n\n");
+		printf("\n");
 		switch (mode)
 		{
 		case(0):
 		{
-			printf("****** 快速生成下個月班表 ******\n");
+			printf("快速生成下個月班表\n\n");
 			//確認是否有已生成的班表，若有則刪除並生成新班表
 			check_delete_head(head);
 			//獲取系統時間，推算下個月
@@ -795,6 +834,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 		{
 			printf("****** 輸出班表 ******\n");
 			file_open(head);
+
 			continue;
 		}
 		case(5):
@@ -804,7 +844,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 		}
 		default:
 		{
-			printf("******輸入錯誤，請再輸入乙次。******\n");
+			printf("****** 輸入錯誤，請再輸入乙次 ******\n");
 			continue;
 		}
 		}
@@ -1262,16 +1302,18 @@ void test_hours(list* head)
 void first_time_dm_info(int* ds_dm_index, int* ds_dm_workday)
 {
 	int i;
-	printf("========== 主管名單 ==========\n\n");
+	printf("主管名單\n");
 
 	//列印主管編號與姓名
 	for (i = 0; i < DM_NUMS; i++)
-		printf("[%d] %s\n", i, dm_all[i]);
+		printf(" [%d] %s\n", i, dm_all[i]);
 
-	printf("\n(1/2)請輸入第一天早班主管編號(例如==> 1)：");
+	printf("\n進度(1/2)\n");
+	printf("    請輸入第一天早班主管編號：");
 	scanf("%d", ds_dm_index);
 
-	printf("(2/2)請輸入第一天早班主管值班第N天(例如==> 1)：");
+	printf("進度(2/2)\n");
+	printf("    請輸入第一天早班主管值班天數:");
 	scanf("%d", ds_dm_workday);
 
 	return;
