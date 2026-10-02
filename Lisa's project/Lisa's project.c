@@ -149,6 +149,9 @@ void check_delete_head(list* head);
 void file_open(list* head);
 
 
+void schedule_to_csv(list* head,FILE* fptr);
+void timesheet_to_csv(list* head, FILE* fptr);
+
 int main()
 {
 	//宣告變數
@@ -188,14 +191,25 @@ void file_open(list* head)
 		return 1;
 	}
 
+	//將班表輸出至csv檔
+	schedule_to_csv(head, fptr);
+	
+	//工時表輸出至csv檔
+	
+
+	fclose(fptr);
+}
+
+void schedule_to_csv(list* head, FILE* fptr)
+{
 	list* current = head;
 	int i, j;
 	//第一行
-	fprintf(fptr, "Date,week,,,%s,,,%s,,,%s,,,Day off,,,Leave\n",shift[0], shift[1], shift[2]);
+	fprintf(fptr, "Date,week,,,%s,,,%s,,,%s,,,Day off,,,Leave\n", shift[0], shift[1], shift[2]);
 	//第二行
 	for (i = 0; i < (SHIFT_NUMS + 2); i++)//+2為多列印Day off和Leave
 	{
-		if(i == 0)
+		if (i == 0)
 			fprintf(fptr, ",");
 
 		for (j = 0; j < PARTS_NUMS; j++)
@@ -228,8 +242,11 @@ void file_open(list* head)
 			current->LEAVE_H);
 		current = current->next;
 	}
+}
 
-	fclose(fptr);
+void timesheet_to_csv(list* head, FILE* fptr)
+{
+
 }
 
 void receive_data(int* year, int* month, int* ds_dm_index, int* ds_dm_workday)
