@@ -65,13 +65,14 @@ typedef struct data
 	struct data* next;
 }list;
 
-//char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "Bruce","Carol" ,"Eason","Frank","Hank","Iris","Ken","Louis" };
-//char dm_all[DM_NUMS][NAME_LEN] = { "Alice" ,"David","Grog","Jackson" };
 char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
 char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
-char shift[3][15] = { "Day","Evening" ,"Night" };
-char parts[3][15] = { "DM","Brine","HCl" };
-char all_week[7][5] = { "Mon","Tue","Wed" ,"Thu" ,"Fri" ,"Sat" ,"Sun" };
+//char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","傑哥","孟昌","宏龍","健忠" };
+//char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
+//char shift[3][15] = { "Day","Evening" ,"Night" };
+char shift[3][15] = { "第一班","第二班" ,"第三班" };
+char parts[3][15] = { "值班主管","一次鹽水","鹽酸" };
+char all_week[7][5] = { "一","二","三" ,"四" ,"五" ,"六" ,"日" };
 float dm_working_hours[DM_NUMS] = { 0.0 };
 float employee_working_hours[EMPLOYEE_NUMS] = { 0.0 };
 int dm_working_days[DM_NUMS] = { 0 };
@@ -87,8 +88,8 @@ void create_calendar_chart(int year, int month, node cale[CAL_ROWS][CAL_COLS]);
 //()建立月曆(當年當月的1號星期幾)
 list* create_calendar_list_console(int year, int month, int ds_dm_index, int ds_dm_workday);
 
-//()列印月曆(月曆的首指標)
-void print_calendar_list_console(list* head);
+//()列印月曆(list型態的首區塊指標, 指標指向ds_dm_index, 指標指向ds_dm_workday)
+void print_calendar_list_console(list* head, int year, int month);
 
 //(回傳當月天數)計算當月天數(年份, 月份)
 int month_days(int year, int month);
@@ -114,7 +115,7 @@ void total_working_days_calculate(list* head);
 //()列印工時(list型態的首區塊指標)
 void total_working_hours_print(list* head);
 
-//請假系統()
+//請假系統(list型態的首區塊指標)
 void leave_system(list* head);
 
 //(索引值)名字搜尋索引值(一維陣列, 一維陣列)
@@ -129,29 +130,41 @@ void initialize_leave_wt(list* head);
 //()分隔線(長度)
 void dividing_line(int cnt);
 
+//()印出表格第一行
 void list_first_line();
 
+//()觀察list內部成員working_hours之值(list型態的首區塊指標)__debug
 void test_hours(list* head);
 
+//()釋放list調用的記憶體空間(list型態的首區塊指標)
 void free_list(list* head);
 
+//()藉由接收第一天主管人員與工作日，推算整個list(指標指向ds_dm_index, 指標指向ds_dm_workday)
 void first_time_dm_info(int* ds_dm_index, int* ds_dm_workday);
 
+//()用於快速生成班表(指標指向year, 指標指向month, 指標指向ds_dm_index, 指標指向ds_dm_workday)
 void first_time(int* year, int* month, int* ds_dm_index, int* ds_dm_workday);
 
+//()歸零主管與員工的該月總工時()
 void working_hour_zero();
 
+//()歸零主管與員工的該月總工作日()
 void working_days_zero();
 
+//()檢查list是否有資料，若有則清除
 void check_delete_head(list* head);
 
 //()開啟檔案(list型態的首區塊指標)
 void file_open(list* head);
 
-
+//()將生成的list班表輸出至csv檔(list型態的首區塊指標, 指向該csv檔案的指標)
 void schedule_to_csv(list* head,FILE* fptr);
+
+//()將生成的工時與工作天數輸出至csv檔(list型態的首區塊指標, 指向該csv檔案的指標)
 void timesheet_to_csv(list* head, FILE* fptr);
-//void open_to_windows();
+
+//()list班表的標題列印(list型態的首區塊指標, 指標指向year, 指標指向month)
+void list_title(list* head, int year, int month);
 
 int main()
 {
@@ -519,7 +532,7 @@ list* create_calendar_list_console(int year, int month, int ds_dm_index, int ds_
 	return head;
 }
 
-void print_calendar_list_console(list* head)
+void print_calendar_list_console(list* head, int year, int month)
 {
 	if (head == NULL)
 	{
@@ -529,6 +542,7 @@ void print_calendar_list_console(list* head)
 
 	//建立標題
 	int i;
+	list_title(head, year, month);
 	list_first_line();
 	dividing_line(160);
 	printf("\n");
@@ -775,8 +789,21 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 		printf(" [3]列印工時表\n");
 		printf(" [4]輸出班表\n");
 		printf(" [5]結束\n\n");
-		printf("請選擇操作指令：");
-		scanf("%d", &mode);
+		/////////////////////////////////////////////////////////////
+		do
+		{
+			printf("請選擇操作指令：");
+			if ((scanf("%d", &mode)) != 1)
+			{
+				printf("請輸入數字。\n");
+				while (getchar() != '\n')
+				{ }
+				continue;
+			}
+			else if (mode < 0 || mode>5)
+				printf("指令輸入錯誤\n");
+		} while (mode < 0 || mode>5);
+		/////////////////////////////////////////////////////////////
 		printf("\n");
 		switch (mode)
 		{
@@ -790,7 +817,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 			//生成月曆
 			head = create_calendar_list_console(year, month, ds_dm_index, ds_dm_workday);
 			//列印月曆
-			print_calendar_list_console(head);
+			print_calendar_list_console(head, year, month);
 			continue;
 		}
 		case(1):
@@ -799,7 +826,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 
 			leave_system(head);
 			//列印月曆
-			print_calendar_list_console(head);
+			print_calendar_list_console(head, year, month);
 			continue;
 		}
 		case(2):
@@ -810,7 +837,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 			receive_data(&year, &month, &ds_dm_index, &ds_dm_workday);
 			//生成月曆
 			head = create_calendar_list_console(year, month, ds_dm_index, ds_dm_workday);
-			print_calendar_list_console(head);
+			print_calendar_list_console(head, year, month);
 			continue;
 		}
 		case(3):
@@ -1263,13 +1290,13 @@ void list_first_line()
 {
 	//printf("%5s%5s%30s%30s%30s%30s%30s\n", "Date", "Week", shift[0], shift[1], shift[2], "Day-off", "Leave");
 	printf("%*s%*s%*s%*s%*s%*s%*s\n"
-		, LIST_DATE_LEN, "Date"
-		, LIST_DATE_LEN, "Week"
+		, LIST_DATE_LEN, "日期"
+		, LIST_DATE_LEN, "星期"
 		, LIST_NAME_LEN * 3, shift[0]
 		, LIST_NAME_LEN * 3, shift[1]
 		, LIST_NAME_LEN * 3, shift[2]
-		, LIST_NAME_LEN * 3, "Day-off"
-		, LIST_NAME_LEN * 3, "Leave");
+		, LIST_NAME_LEN * 3, "輪休"
+		, LIST_NAME_LEN * 3, "假差");
 }
 
 void test_hours(list* head)
@@ -1308,13 +1335,26 @@ void first_time_dm_info(int* ds_dm_index, int* ds_dm_workday)
 	for (i = 0; i < DM_NUMS; i++)
 		printf(" [%d] %s\n", i, dm_all[i]);
 
-	printf("\n進度(1/2)\n");
-	printf("    請輸入第一天早班主管編號：");
-	scanf("%d", ds_dm_index);
+	do
+	{
+		printf("\n進度(1/2)\n");
+		printf("    請輸入第一天早班主管編號：");
+		scanf("%d", ds_dm_index);
 
-	printf("進度(2/2)\n");
-	printf("    請輸入第一天早班主管值班天數:");
-	scanf("%d", ds_dm_workday);
+		if (*ds_dm_index < 0 || *ds_dm_index > DM_NUMS)
+			printf("錯誤訊息::請輸入正確的數字\n");
+	} while (*ds_dm_index < 0 || *ds_dm_index > DM_NUMS);
+
+
+	do
+	{
+		printf("進度(2/2)\n");
+		printf("    請輸入第一天早班主管值班天數:");
+		scanf("%d", ds_dm_workday);
+		if (*ds_dm_workday <= 0 || *ds_dm_workday >= 6)
+			printf("錯誤訊息::請輸入正確的數字\n");
+	}while(*ds_dm_workday <= 0 || *ds_dm_workday >= 6);
+
 
 	return;
 }
@@ -1375,3 +1415,8 @@ void check_delete_head(list* head)
 	}
 }
 
+void list_title(list* head, int year, int month)
+{
+	int ROC_year = year - 1911;
+	printf("\n電解製造課%4d年%2d月份值班表--正式班表\n\n", ROC_year, month);
+}
