@@ -1418,5 +1418,5 @@ void check_delete_head(list* head)
 void list_title(list* head, int year, int month)
 {
 	int ROC_year = year - 1911;
-	printf("\n電解製造課%4d年%2d月份值班表--正式班表\n\n", ROC_year, month);
+	printf("\nXXXX課%4d年%2d月份值班表--正式班表\n\n", ROC_year, month);
 }
