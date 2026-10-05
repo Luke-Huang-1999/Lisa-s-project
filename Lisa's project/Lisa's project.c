@@ -104,7 +104,7 @@ list* create_list(int month, int day, char week[5], char DS_DM[10], char DS_B[10
 void working_hours_daily(list* head);
 
 //()操作系統(list型態的首區塊指標, 年, 月)
-void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds_dm_workday);
+void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday);
 
 //()該月工時總計(list型態的首區塊指標)
 void total_working_hours_calculate(list* head);
@@ -169,17 +169,18 @@ void list_title(list* head, int year, int month);
 int main()
 {
 	//宣告變數
-	int year, month;
+	int year = 2026;
+	int month = 8;
 	node cale[CAL_ROWS][CAL_COLS] = { 0 };
 	list* head = NULL;
-	year = 2026;
-	month = 8;
+	/*year = 2026;
+	month = 8;*/
 	int ds_dm_index = 2;
 	int ds_dm_workday = 4;
 	int personal_leave = 0;
 
 	//操作系統
-	operation_system(head, year, month, ds_dm_index, ds_dm_workday);
+	operation_system(head, ds_dm_index, ds_dm_workday);
 
 	//釋放記憶體
 	free_list(head);
@@ -297,7 +298,8 @@ void timesheet_to_csv(list* head, FILE* fptr)
 
 void receive_data(int* year, int* month, int* ds_dm_index, int* ds_dm_workday)
 {
-	printf("請輸入年份與月份：(例如 ==> 2026 8)\n");
+	printf("年份資料初始化\n");
+	printf("    請輸入年份與月份(西元年 月)：");
 	scanf("%d %d", year, month);
 	printf("\n");
 	first_time_dm_info(ds_dm_index, ds_dm_workday);
@@ -776,9 +778,11 @@ void working_hours_daily(list* head)
 	}
 }
 
-void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds_dm_workday)
+void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 {
 	int mode;
+	int year = 2026;
+	int month = 1;
 	printf("歡迎進入熊熊班表系統 版本號:1.0\n\n");
 	while (1)
 	{
@@ -800,9 +804,9 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 				{ }
 				continue;
 			}
-			else if (mode < 0 || mode>5)
+			else if (mode < 0 || mode > 5)
 				printf("指令輸入錯誤\n");
-		} while (mode < 0 || mode>5);
+		} while (mode < 0 || mode > 5);
 		/////////////////////////////////////////////////////////////
 		printf("\n");
 		switch (mode)
@@ -822,7 +826,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 		}
 		case(1):
 		{
-			printf("****** 請假系統 ******\n");
+			printf("請假系統\n\n");
 
 			leave_system(head);
 			//列印月曆
@@ -831,7 +835,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 		}
 		case(2):
 		{
-			printf("****** 列印特定班表 ******\n");
+			printf("列印特定班表\n\n");
 			//確認是否有已生成的班表，若有則刪除並生成新班表
 			check_delete_head(head);
 			receive_data(&year, &month, &ds_dm_index, &ds_dm_workday);
@@ -842,7 +846,7 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 		}
 		case(3):
 		{
-			printf("****** 列印工時表 ******\n");
+			printf("列印工時表\n\n");
 			//計算不含請假人員工時
 			total_working_hours_calculate(head);
 			//加班人員工時新增
@@ -859,19 +863,19 @@ void operation_system(list* head, int year, int month, int* ds_dm_index, int* ds
 
 		case(4):
 		{
-			printf("****** 輸出班表 ******\n");
+			printf("輸出班表至csv檔\n\n");
 			file_open(head);
 
 			continue;
 		}
 		case(5):
 		{
-			printf("****** 結束 ******\n");
+			printf("結束\n\n");
 			break;
 		}
 		default:
 		{
-			printf("****** 輸入錯誤，請再輸入乙次 ******\n");
+			printf("輸入錯誤，請再輸入乙次\n\n");
 			continue;
 		}
 		}
