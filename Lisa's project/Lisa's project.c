@@ -4,15 +4,23 @@
 #include <stdlib.h>
 #include<time.h>
 
+#define RED		"\033[31m"
+#define GREEN	"\033[032m"
+#define YELLOW	"\033[033m"
+#define COLOR_RESET	"\033[0m"
+
+
 #define CAL_ROWS 6						//6行
 #define CAL_COLS 7						//一週7天
-#define EMPLOYEE_NUMS 8					//員工人數
+#define EMPLOYEE_NUMS 8					//員工人數(值班主管/一次鹽水/鹽酸)
+#define EMPLOYEE_FILLING 2				//員工人數(早班充填人員)
+#define EMPLOYEE_ANALYSIS 1				//員工人數(電槽分析)
 #define DM_NUMS 4						//值班主管人數
 #define WORK_DAY_MAX 6					//最多連續做幾天
 #define EMPTY_DAY 0						//月曆中空白日的賦值
 #define SHIFT_NUMS 3					//班別(早班午班晚班)
 #define	PARTS_NUMS 3					//工作位置(DM, HCl, B)
-#define NAME_LEN 15						//員工名字長度限制
+#define NAME_LEN 10						//員工名字長度限制
 #define working_hours_per_day 8.0		//一日工時
 
 #define LIST_DATE_LEN 5
@@ -30,13 +38,21 @@ typedef struct data
 {
 	int month;
 	int day;
-	char week[5];
+	char week[LIST_DATE_LEN];
 	char DS_DM[NAME_LEN];
 	float DS_DM_WORKING_HOURS;
 	char DS_B[NAME_LEN];
 	float DS_B_WORKING_HOURS;
 	char DS_H[NAME_LEN];
 	float DS_H_WORKING_HOURS;
+	//新增充填人員and 電槽分析
+	char DS_F1[NAME_LEN];
+	float DS_F1_WORKING_HOURS;
+	char DS_F2[NAME_LEN];
+	float DS_F2_WORKING_HOURS;
+	char DS_A[NAME_LEN];
+	float DS_A_WORKING_HOURS;
+
 	char ES_DM[NAME_LEN];
 	float ES_DM_WORKING_HOURS;
 	char ES_B[NAME_LEN];
@@ -66,6 +82,8 @@ typedef struct data
 }list;
 
 char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
+char empolyee_filling[EMPLOYEE_FILLING][NAME_LEN] = { "充1", "充2" };
+char employee_analysis[EMPLOYEE_ANALYSIS][NAME_LEN] = { "分析" };
 char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
 //char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","傑哥","孟昌","宏龍","健忠" };
 //char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
@@ -98,7 +116,7 @@ int month_days(int year, int month);
 void print_calendar_chart_console(node cale[CAL_ROWS][CAL_COLS]);
 
 //()生成月曆清單節點(相關資料)
-list* create_list(int month, int day, char week[5], char DS_DM[10], char DS_B[10], char DS_H[10], char ES_DM[10], char ES_B[10], char ES_H[10], char NS_DM[10], char NS_B[10], char NS_H[10], char DO_DM[10], char DO_B[10], char DO_H[10], char LEAVE_DS[10], char LEAVE_ES[10], char LEAVE_NS[10]);
+list* create_list(int month, int day, char week[LIST_DATE_LEN], char DS_DM[NAME_LEN], char DS_B[NAME_LEN], char DS_H[NAME_LEN], char ES_DM[NAME_LEN], char ES_B[NAME_LEN], char ES_H[NAME_LEN], char NS_DM[NAME_LEN], char NS_B[NAME_LEN], char NS_H[NAME_LEN], char DO_DM[NAME_LEN], char DO_B[NAME_LEN], char DO_H[NAME_LEN], char LEAVE_DS[NAME_LEN], char LEAVE_ES[NAME_LEN], char LEAVE_NS[NAME_LEN]);
 
 //每日工時計算(list型態的首區塊指標)
 void working_hours_daily(list* head);
@@ -573,7 +591,7 @@ void print_calendar_list_console(list* head, int year, int month)
 		//指標移動
 		current = current->next;
 	}
-	printf("班表列印完成...\n\n");
+	printf(GREEN"班表列印完成...\n\n"COLOR_RESET);
 }
 
 int month_days(int year, int month)
@@ -664,7 +682,7 @@ void print_calendar_chart_console(node cale[CAL_ROWS][CAL_COLS])
 	}
 }
 
-list* create_list(int month, int day, char week[5], char DS_DM[10], char DS_B[10], char DS_H[10], char ES_DM[10], char ES_B[10], char ES_H[10], char NS_DM[10], char NS_B[10], char NS_H[10], char DO_DM[10], char DO_B[10], char DO_H[10], char LEAVE_DM[10], char LEAVE_B[10], char LEAVE_H[10])
+list* create_list(int month, int day, char week[LIST_DATE_LEN], char DS_DM[NAME_LEN], char DS_B[NAME_LEN], char DS_H[NAME_LEN], char ES_DM[NAME_LEN], char ES_B[NAME_LEN], char ES_H[NAME_LEN], char NS_DM[NAME_LEN], char NS_B[NAME_LEN], char NS_H[NAME_LEN], char DO_DM[NAME_LEN], char DO_B[NAME_LEN], char DO_H[NAME_LEN], char LEAVE_DM[NAME_LEN], char LEAVE_B[NAME_LEN], char LEAVE_H[NAME_LEN])
 {
 	int i = 0;
 	list* newnode = (list*)malloc(sizeof(list));
@@ -799,13 +817,13 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 			printf("請選擇操作指令：");
 			if ((scanf("%d", &mode)) != 1)
 			{
-				printf("請輸入數字。\n");
+				printf(RED"錯誤訊息：請輸入數字。\n"COLOR_RESET);
 				while (getchar() != '\n')
 				{ }
 				continue;
 			}
 			else if (mode < 0 || mode > 5)
-				printf("指令輸入錯誤\n");
+				printf(RED"指令輸入錯誤\n"COLOR_RESET);
 		} while (mode < 0 || mode > 5);
 		/////////////////////////////////////////////////////////////
 		printf("\n");
@@ -813,7 +831,7 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 		{
 		case(0):
 		{
-			printf("快速生成下個月班表\n\n");
+			printf("快速生成下個月班表...\n\n");
 			//確認是否有已生成的班表，若有則刪除並生成新班表
 			check_delete_head(head);
 			//獲取系統時間，推算下個月
@@ -826,7 +844,7 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 		}
 		case(1):
 		{
-			printf("請假系統\n\n");
+			printf("請假系統...\n\n");
 
 			leave_system(head);
 			//列印月曆
@@ -835,7 +853,7 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 		}
 		case(2):
 		{
-			printf("列印特定班表\n\n");
+			printf("列印特定班表...\n\n");
 			//確認是否有已生成的班表，若有則刪除並生成新班表
 			check_delete_head(head);
 			receive_data(&year, &month, &ds_dm_index, &ds_dm_workday);
@@ -846,7 +864,7 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 		}
 		case(3):
 		{
-			printf("列印工時表\n\n");
+			printf("列印工時表...\n\n");
 			//計算不含請假人員工時
 			total_working_hours_calculate(head);
 			//加班人員工時新增
@@ -863,19 +881,19 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 
 		case(4):
 		{
-			printf("輸出班表至csv檔\n\n");
+			printf("輸出班表至csv檔...\n\n");
 			file_open(head);
 
 			continue;
 		}
 		case(5):
 		{
-			printf("結束\n\n");
+			printf("程式結束 謝謝使用!\n\n");
 			break;
 		}
 		default:
 		{
-			printf("輸入錯誤，請再輸入乙次\n\n");
+			printf(RED"錯誤訊息：輸入錯誤，請再輸入乙次\n\n"COLOR_RESET);
 			continue;
 		}
 		}
