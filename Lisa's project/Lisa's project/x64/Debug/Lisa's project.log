@@ -6,20 +6,20 @@ C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(201
 C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(215,11): warning C4047: '==': 'FILE *' 與 'int' 間接取值的層級不同
 C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(218,3): warning C4098: 'file_open': 'void' 函式正在傳回值
 C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(224,3): warning C4098: 'file_open': 'void' 函式正在傳回值
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(838,30): warning C4047: '函式': 'int *' 與 'int **' 間接取值的層級不同
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(838,30): warning C4024: 'first_time': 型式和實質參數 3 不同的類型
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(838,44): warning C4047: '函式': 'int *' 與 'int **' 間接取值的層級不同
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(838,44): warning C4024: 'first_time': 型式和實質參數 4 不同的類型
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(840,53): warning C4047: '函式': 'int' 與 'int *' 間接取值的層級不同
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(840,53): warning C4024: 'create_calendar_list_console': 型式和實質參數 3 不同的類型
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(840,66): warning C4047: '函式': 'int' 與 'int *' 間接取值的層級不同
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(840,66): warning C4024: 'create_calendar_list_console': 型式和實質參數 4 不同的類型
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(859,32): warning C4047: '函式': 'int *' 與 'int **' 間接取值的層級不同
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(859,32): warning C4024: 'receive_data': 型式和實質參數 3 不同的類型
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(859,46): warning C4047: '函式': 'int *' 與 'int **' 間接取值的層級不同
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(859,46): warning C4024: 'receive_data': 型式和實質參數 4 不同的類型
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(861,53): warning C4047: '函式': 'int' 與 'int *' 間接取值的層級不同
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(861,53): warning C4024: 'create_calendar_list_console': 型式和實質參數 3 不同的類型
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(861,66): warning C4047: '函式': 'int' 與 'int *' 間接取值的層級不同
-C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(861,66): warning C4024: 'create_calendar_list_console': 型式和實質參數 4 不同的類型
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(855,30): warning C4047: '函式': 'int *' 與 'int **' 間接取值的層級不同
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(855,30): warning C4024: 'first_time': 型式和實質參數 3 不同的類型
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(855,44): warning C4047: '函式': 'int *' 與 'int **' 間接取值的層級不同
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(855,44): warning C4024: 'first_time': 型式和實質參數 4 不同的類型
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(857,53): warning C4047: '函式': 'int' 與 'int *' 間接取值的層級不同
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(857,53): warning C4024: 'create_calendar_list_console': 型式和實質參數 3 不同的類型
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(857,66): warning C4047: '函式': 'int' 與 'int *' 間接取值的層級不同
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(857,66): warning C4024: 'create_calendar_list_console': 型式和實質參數 4 不同的類型
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(876,32): warning C4047: '函式': 'int *' 與 'int **' 間接取值的層級不同
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(876,32): warning C4024: 'receive_data': 型式和實質參數 3 不同的類型
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(876,46): warning C4047: '函式': 'int *' 與 'int **' 間接取值的層級不同
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(876,46): warning C4024: 'receive_data': 型式和實質參數 4 不同的類型
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(878,53): warning C4047: '函式': 'int' 與 'int *' 間接取值的層級不同
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(878,53): warning C4024: 'create_calendar_list_console': 型式和實質參數 3 不同的類型
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(878,66): warning C4047: '函式': 'int' 與 'int *' 間接取值的層級不同
+C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\Lisa's project.c(878,66): warning C4024: 'create_calendar_list_console': 型式和實質參數 4 不同的類型
   Lisa's project.vcxproj -> C:\Users\USER\Desktop\C語言\Lisa-s-project\Lisa's project\x64\Debug\Lisa's project.exe

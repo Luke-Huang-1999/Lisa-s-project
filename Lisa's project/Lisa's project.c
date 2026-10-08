@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include<time.h>
 
-#define RED		"\033[31m"
-#define GREEN	"\033[032m"
-#define YELLOW	"\033[033m"
+#define RED			"\033[31m"
+#define GREEN		"\033[032m"
+#define YELLOW		"\033[033m"
 #define COLOR_RESET	"\033[0m"
 
 
@@ -45,7 +45,7 @@ typedef struct data
 	float DS_B_WORKING_HOURS;
 	char DS_H[NAME_LEN];
 	float DS_H_WORKING_HOURS;
-	//新增充填人員and 電槽分析
+	//新增充填人員and電槽分析
 	char DS_F1[NAME_LEN];
 	float DS_F1_WORKING_HOURS;
 	char DS_F2[NAME_LEN];
@@ -77,24 +77,31 @@ typedef struct data
 	float LEAVE_B_WORKING_HOURS;
 	char LEAVE_H[NAME_LEN];
 	float LEAVE_H_WORKING_HOURS;
-	char NAME_LIST[15][NAME_LEN];
+	//char NAME_LIST[EMPLOYEE_NUMS + EMPLOYEE_FILLING + EMPLOYEE_ANALYSIS][NAME_LEN];//15
 	struct data* next;
 }list;
 
-char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
+//char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
 char empolyee_filling[EMPLOYEE_FILLING][NAME_LEN] = { "充1", "充2" };
-char employee_analysis[EMPLOYEE_ANALYSIS][NAME_LEN] = { "分析" };
-char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
-//char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","傑哥","孟昌","宏龍","健忠" };
-//char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
+char empolyee_analysis[EMPLOYEE_ANALYSIS][NAME_LEN] = { "分析" };
+//char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
+char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","傑哥","孟昌","宏龍","健忠" };
+char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
+
 //char shift[3][15] = { "Day","Evening" ,"Night" };
 char shift[3][15] = { "第一班","第二班" ,"第三班" };
 char parts[3][15] = { "值班主管","一次鹽水","鹽酸" };
 char all_week[7][5] = { "一","二","三" ,"四" ,"五" ,"六" ,"日" };
+
 float dm_working_hours[DM_NUMS] = { 0.0 };
 float employee_working_hours[EMPLOYEE_NUMS] = { 0.0 };
+float empolyee_filling_working_hours[EMPLOYEE_FILLING] = { 0.0 };
+float empolyee_analysis_working_hours[EMPLOYEE_ANALYSIS] = { 0.0 };
+
 int dm_working_days[DM_NUMS] = { 0 };
 int employee_working_days[EMPLOYEE_NUMS] = { 0 };
+int empolyee_filling_working_days[EMPLOYEE_FILLING] = { 0.0 };
+int empolyee_analysis_working_days[EMPLOYEE_ANALYSIS] = { 0.0 };
 
 void receive_data(int* year, int* month, int* ds_dm_index, int* ds_dm_workday);
 //(回傳當年當月的1號星期幾)蔡勒公式(年份, 月份)
@@ -176,7 +183,7 @@ void check_delete_head(list* head);
 void file_open(list* head);
 
 //()將生成的list班表輸出至csv檔(list型態的首區塊指標, 指向該csv檔案的指標)
-void schedule_to_csv(list* head,FILE* fptr);
+void schedule_to_csv(list* head, FILE* fptr);
 
 //()將生成的工時與工作天數輸出至csv檔(list型態的首區塊指標, 指向該csv檔案的指標)
 void timesheet_to_csv(list* head, FILE* fptr);
@@ -226,7 +233,7 @@ void file_open(list* head)
 
 	//將班表輸出至csv檔
 	schedule_to_csv(head, fptr);
-	
+
 	//間隔兩行
 	fprintf(fptr, "\n\n");
 
@@ -310,7 +317,7 @@ void timesheet_to_csv(list* head, FILE* fptr)
 		//間隔
 		fprintf(fptr, "\n");
 	}
-	
+
 
 }
 
@@ -451,19 +458,19 @@ list* create_calendar_list_console(int year, int month, int ds_dm_index, int ds_
 	list* head = NULL;
 	list* current = NULL;
 	list* newnode = NULL;
-
+	//處理值班主管+一次鹽水+鹽酸
 	while (day_cnt <= day_max)
 	{
 		newnode = create_list(month,
 			day_cnt,
 			all_week[(week++) % CAL_COLS],
-			dm_all[(ds_dm_index) % DM_NUMS],						//早班
+			dm_all[(ds_dm_index) % DM_NUMS],						//第一班
 			employee_all[(ds_employee_index) % EMPLOYEE_NUMS],
 			employee_all[(ds_employee_index + 1) % EMPLOYEE_NUMS],
-			dm_all[(es_dm_index) % DM_NUMS],						//午班
+			dm_all[(es_dm_index) % DM_NUMS],						//第二班
 			employee_all[(es_employee_index) % EMPLOYEE_NUMS],
 			employee_all[(es_employee_index + 1) % EMPLOYEE_NUMS],
-			dm_all[(ns_dm_index) % DM_NUMS],						//晚班
+			dm_all[(ns_dm_index) % DM_NUMS],						//第三班
 			employee_all[(ns_employee_index) % EMPLOYEE_NUMS],
 			employee_all[(ns_employee_index + 1) % EMPLOYEE_NUMS],
 			dm_all[(do_dm_index) % DM_NUMS],						//輪休
@@ -545,6 +552,31 @@ list* create_calendar_list_console(int year, int month, int ds_dm_index, int ds_
 		day_cnt++;
 	}
 
+	//處理充填1+充填2+電槽分析
+	current = head;
+	while (current != NULL)
+	{
+
+		//充填1控制
+		if (strcmp(current->DO_DM, dm_all[3]) != 0)
+		{
+			strcpy(current->DS_F1, empolyee_filling[0]);
+		}
+		//充填2控制
+		if (strcmp(current->DO_DM, dm_all[0]) != 0)
+		{
+			strcpy(current->DS_F2, empolyee_filling[1]);
+		}
+		//電槽分析控制
+		if (strcmp(current->week, all_week[5]) != 0 && strcmp(current->week, all_week[6]) != 0)
+		{
+			strcpy(current->DS_A, empolyee_analysis[0]);
+		}
+
+
+		//指標控制
+		current = current->next;
+	}
 
 	working_hours_daily(head);
 
@@ -693,39 +725,31 @@ list* create_list(int month, int day, char week[LIST_DATE_LEN], char DS_DM[NAME_
 	}
 
 	//初始化
+	//日期控制
 	newnode->month = month;
 	newnode->day = day;
 	strcpy(newnode->week, week);
+	//第一班人員控制
 	strcpy(newnode->DS_DM, DS_DM);
-	strcpy(newnode->NAME_LIST[i++], DS_DM);
 	strcpy(newnode->DS_B, DS_B);
-	strcpy(newnode->NAME_LIST[i++], DS_B);
 	strcpy(newnode->DS_H, DS_H);
-	strcpy(newnode->NAME_LIST[i++], DS_H);
+	//第二班人員控制
 	strcpy(newnode->ES_DM, ES_DM);
-	strcpy(newnode->NAME_LIST[i++], ES_DM);
 	strcpy(newnode->ES_B, ES_B);
-	strcpy(newnode->NAME_LIST[i++], ES_B);
 	strcpy(newnode->ES_H, ES_H);
-	strcpy(newnode->NAME_LIST[i++], ES_H);
+	//第三班人員控制
 	strcpy(newnode->NS_DM, NS_DM);
-	strcpy(newnode->NAME_LIST[i++], NS_DM);
 	strcpy(newnode->NS_B, NS_B);
-	strcpy(newnode->NAME_LIST[i++], NS_B);
 	strcpy(newnode->NS_H, NS_H);
-	strcpy(newnode->NAME_LIST[i++], NS_H);
+	//輪休人員控制
 	strcpy(newnode->DO_DM, DO_DM);
-	strcpy(newnode->NAME_LIST[i++], DO_DM);
 	strcpy(newnode->DO_B, DO_B);
-	strcpy(newnode->NAME_LIST[i++], DO_B);
 	strcpy(newnode->DO_H, DO_H);
-	strcpy(newnode->NAME_LIST[i++], DO_H);
+	//假差人員控制
 	strcpy(newnode->LEAVE_DM, LEAVE_DM);
-	strcpy(newnode->NAME_LIST[i++], LEAVE_DM);
 	strcpy(newnode->LEAVE_B, LEAVE_B);
-	strcpy(newnode->NAME_LIST[i++], LEAVE_B);
 	strcpy(newnode->LEAVE_H, LEAVE_H);
-	strcpy(newnode->NAME_LIST[i++], LEAVE_H);
+
 	newnode->next = NULL;
 
 	return newnode;
@@ -748,7 +772,7 @@ void working_hours_daily(list* head)
 	{
 
 		initialize_leave_wt(head);
-
+		//值班主管控制
 		for (i = 0; i < DM_NUMS; i++)
 		{
 			if (strcmp(current->DS_DM, dm_all[i]) == 0)
@@ -763,7 +787,7 @@ void working_hours_daily(list* head)
 			else if (strcmp(current->DO_DM, dm_all[i]) == 0)
 				current->DO_DM_WORKING_HOURS = 0.0;
 		}
-
+		//一次鹽水+鹽酸控制
 		for (i = 0; i < EMPLOYEE_NUMS; i++)
 		{
 			if (strcmp(current->DS_B, employee_all[i]) == 0)
@@ -790,6 +814,17 @@ void working_hours_daily(list* head)
 				current->LEAVE_B_WORKING_HOURS = -working_hours_per_day;
 			else if (strcmp(current->LEAVE_H, employee_all[i]) == 0)
 				current->LEAVE_H_WORKING_HOURS = -working_hours_per_day;
+		}
+		//充填1+充填2控制
+		{
+			if (strcmp(current->DS_F1, empolyee_filling[0]) == 0)
+			{
+				current->DS_F1_WORKING_HOURS += working_hours_per_day;
+			}
+			if (strcmp(current->DS_F2, empolyee_filling[1] == 0))
+			{
+				current->DS_F2_WORKING_HOURS += working_hours_per_day;
+			}
 		}
 		//指標移動
 		current = current->next;
@@ -819,7 +854,8 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 			{
 				printf(RED"錯誤訊息：請輸入數字。\n"COLOR_RESET);
 				while (getchar() != '\n')
-				{ }
+				{
+				}
 				continue;
 			}
 			else if (mode < 0 || mode > 5)
@@ -942,6 +978,24 @@ void total_working_hours_calculate(list* head)
 			else if (strcmp(current->NS_H, employee_all[i]) == 0)
 				employee_working_hours[i] += current->NS_H_WORKING_HOURS;
 		}
+
+		//充填1工時計算
+		if (strcmp(current->DS_F1, empolyee_filling[0]) == 0)
+		{
+			empolyee_filling_working_hours[0] += current->DS_F1_WORKING_HOURS;
+		}
+		//充填2工時計算
+		if (strcmp(current->DS_F2, empolyee_filling[1]) == 0)
+		{
+			empolyee_filling_working_hours[1] += current->DS_F2_WORKING_HOURS;
+		}
+		//電槽分析工時計算
+		if (strcmp(current->DS_A, empolyee_analysis[0]) == 0)
+		{
+			empolyee_analysis_working_hours[0] += current->DS_A_WORKING_HOURS;
+		}
+
+
 		current = current->next;
 	}
 }
@@ -952,20 +1006,20 @@ void total_working_days_calculate(list* head)
 	list* current = head;
 	while (current != NULL)
 	{
-		//DM工時
+		//值班主管工作天數計算
 		for (i = 0; i < DM_NUMS; i++)
 		{
 			if (strcmp(current->DS_DM, dm_all[i]) == 0)
-				dm_working_days[i] ++;
+				dm_working_days[i]++;
 
 			else if (strcmp(current->ES_DM, dm_all[i]) == 0)
-				dm_working_days[i] ++;
+				dm_working_days[i]++;
 
 			else if (strcmp(current->NS_DM, dm_all[i]) == 0)
-				dm_working_days[i] ++;
+				dm_working_days[i]++;
 		}
 
-		//EMPLOYEE工時
+		//一次鹽水+鹽酸工作天數計算
 		for (i = 0; i < EMPLOYEE_NUMS; i++)
 		{
 			if (strcmp(current->DS_B, employee_all[i]) == 0)
@@ -987,6 +1041,23 @@ void total_working_days_calculate(list* head)
 				employee_working_days[i]++;
 		}
 
+		//充填1工作天數計算
+		if (strcmp(current->DS_F1, empolyee_filling) == 0)
+		{
+			empolyee_filling_working_days[0]++;
+		}
+
+		//充填2工作天數計算
+		if (strcmp(current->DS_F2, empolyee_filling) == 0)
+		{
+			empolyee_filling_working_days[1]++;
+		}
+		//電槽分析工作天數計算
+		if (strcmp(current->DS_A, empolyee_analysis) == 0)
+		{
+			empolyee_analysis_working_days[0]++;
+		}
+
 		//指標移動
 		current = current->next;
 	}
@@ -995,23 +1066,39 @@ void total_working_days_calculate(list* head)
 void working_hour_zero()
 {
 	int i;
+	//值班主管+一次鹽水+鹽酸
 	for (i = 0; i < DM_NUMS; i++)
 	{
 		dm_working_hours[i] = 0.0f;
 		employee_working_hours[2 * i] = 0.0f;
 		employee_working_hours[2 * i + 1] = 0.0f;
 	}
+	//充填1+2
+	for (i = 0; i < EMPLOYEE_FILLING; i++)
+	{
+		empolyee_filling_working_hours[i] = 0.0f;
+	}
+	//電槽分析
+	empolyee_analysis_working_hours[0] = 0.0f;
 }
 
 void working_days_zero()
 {
 	int i;
+	//值班主管+一次鹽水+鹽酸
 	for (i = 0; i < DM_NUMS; i++)
 	{
 		dm_working_days[i] = 0;
 		employee_working_days[2 * i] = 0;
 		employee_working_days[2 * i + 1] = 0;
 	}
+	//充填1+2
+	for (i = 0; i < EMPLOYEE_FILLING; i++)
+	{
+		empolyee_filling_working_days[i] = 0;
+	}
+	//電槽分析
+	empolyee_analysis_working_days[0] = 0;
 }
 
 void total_working_hours_print(list* head)
@@ -1375,7 +1462,7 @@ void first_time_dm_info(int* ds_dm_index, int* ds_dm_workday)
 		scanf("%d", ds_dm_workday);
 		if (*ds_dm_workday <= 0 || *ds_dm_workday >= 6)
 			printf("錯誤訊息::請輸入正確的數字\n");
-	}while(*ds_dm_workday <= 0 || *ds_dm_workday >= 6);
+	} while (*ds_dm_workday <= 0 || *ds_dm_workday >= 6);
 
 
 	return;
