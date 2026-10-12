@@ -182,10 +182,10 @@ void working_days_zero();
 void check_delete_head(list* head);
 
 //()開啟檔案(list型態的首區塊指標)
-void file_open(list* head);
+void file_open(list* head, int year, int month);
 
 //()將生成的list班表輸出至csv檔(list型態的首區塊指標, 指向該csv檔案的指標)
-void schedule_to_csv(list* head, FILE* fptr);
+void schedule_to_csv(list* head, FILE* fptr, int year, int month);
 
 //()將生成的工時與工作天數輸出至csv檔(list型態的首區塊指標, 指向該csv檔案的指標)
 void timesheet_to_csv(list* head, FILE* fptr);
@@ -218,7 +218,7 @@ int main()
 	return 0;
 }
 
-void file_open(list* head)
+void file_open(list* head, int year, int month)
 {
 	FILE* fptr = fopen("Shift schedule.csv", "w");
 	if (fptr == 1)
@@ -234,7 +234,7 @@ void file_open(list* head)
 	}
 
 	//將班表輸出至csv檔
-	schedule_to_csv(head, fptr);
+	schedule_to_csv(head, fptr, year, month);
 
 	//間隔兩行
 	fprintf(fptr, "\n\n");
@@ -249,34 +249,52 @@ void file_open(list* head)
 	system("start \"\" \"Shift schedule.csv\"");
 }
 
-void schedule_to_csv(list* head, FILE* fptr)
+void schedule_to_csv(list* head, FILE* fptr, int year, int month)
 {
 	list* current = head;
-	int i, j;
-	//第一行
-	fprintf(fptr, "Date,week,,,%s,,,%s,,,%s,,,Day off,,,Leave\n", shift[0], shift[1], shift[2]);
+	int i, j, k;
+	//第一行-標題
+	int ROC_year = year - 1911;
+	fprintf(fptr, "XXXX課%4d年%2d月份值班表--正式班表\n", ROC_year, month);
 	//第二行
-	for (i = 0; i < (SHIFT_NUMS + 2); i++)//+2為多列印Day off和Leave
+	fprintf(fptr, "Date,week,,,,,,%s,,,%s,,,%s,,,Day off,,,Leave\n", shift[0], shift[1], shift[2]);
+	
+	//第三行
+	//第一班
+	for (j = 0; j < PARTS_NUMS; j++)
 	{
-		if (i == 0)
+		if (j == 0)
 			fprintf(fptr, ",");
-
+		fprintf(fptr, ",%s", parts[j]);
+	}
+	for (k = 0; k < EMPLOYEE_FILLING; k++)
+	{
+		fprintf(fptr, ",%s", parts_filling[k]);
+	}
+	fprintf(fptr, ",%s", parts_analysis[0]);
+	//第二班/第三班/輪休/假差
+	for (i = 0; i < 4; i++)
+	{
 		for (j = 0; j < PARTS_NUMS; j++)
 		{
 			fprintf(fptr, ",%s", parts[j]);
 		}
 	}
+
 	fprintf(fptr, "\n");
-	//第三行到結束
+	//第四行到結束
 	while (current != NULL)
 	{
-		fprintf(fptr, "%d/%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+		fprintf(fptr, "%d/%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
 			current->month,
 			current->day,
 			current->week,
 			current->DS_DM,
 			current->DS_B,
 			current->DS_H,
+			current->DS_F1,
+			current->DS_F2,
+			current->DS_A,
 			current->ES_DM,
 			current->ES_B,
 			current->ES_H,
@@ -307,20 +325,36 @@ void timesheet_to_csv(list* head, FILE* fptr)
 	//第二行
 	fprintf(fptr, ",%s,%s\n", "小時", "天");
 	//列印資料
-	int i;
+	int i, j;
 	for (i = 0; i < DM_NUMS; i++)
 	{
-		//主管
-		fprintf(fptr, "%s,%3.1f,%d\n", dm_all[i], dm_working_hours[i], dm_working_days[i]);
-		//Brine
-		fprintf(fptr, "%s,%3.1f,%d\n", employee_all[2 * i], employee_working_hours[2 * i], employee_working_days[2 * i]);
-		//HCl
-		fprintf(fptr, "%s,%3.1f,%d\n", employee_all[2 * i + 1], employee_working_hours[2 * i + 1], employee_working_days[2 * i + 1]);
-		//間隔
-		fprintf(fptr, "\n");
+		if (i == 0)
+		{
+			//主管
+			fprintf(fptr, "%s,%3.1f,%d\n", dm_all[i], dm_working_hours[i], dm_working_days[i]);
+			//一次鹽水
+			fprintf(fptr, "%s,%3.1f,%d\n", employee_all[2 * i], employee_working_hours[2 * i], employee_working_days[2 * i]);
+			//鹽酸
+			fprintf(fptr, "%s,%3.1f,%d\n", employee_all[2 * i + 1], employee_working_hours[2 * i + 1], employee_working_days[2 * i + 1]);
+			//充填1 and 充填2
+			for (j = 0; j < EMPLOYEE_FILLING; j++)
+			{
+				fprintf(fptr, "%s,%3.1f,%d\n", empolyee_filling[j], empolyee_filling_working_hours[j], empolyee_filling_working_days[j]);
+			}
+			//電槽分析
+			fprintf(fptr, "%s,%3.1f,%d\n", empolyee_analysis[0], empolyee_analysis_working_hours[0], empolyee_analysis_working_days[0]);
+		}
+		else
+		{
+			//主管
+			fprintf(fptr, "%s,%3.1f,%d\n", dm_all[i], dm_working_hours[i], dm_working_days[i]);
+			//一次鹽水
+			fprintf(fptr, "%s,%3.1f,%d\n", employee_all[2 * i], employee_working_hours[2 * i], employee_working_days[2 * i]);
+			//鹽酸
+			fprintf(fptr, "%s,%3.1f,%d\n", employee_all[2 * i + 1], employee_working_hours[2 * i + 1], employee_working_days[2 * i + 1]);
+
+		}
 	}
-
-
 }
 
 void receive_data(int* year, int* month, int* ds_dm_index, int* ds_dm_workday)
@@ -642,7 +676,7 @@ void print_calendar_list_console(list* head, int year, int month)
 		printf("%*s%*s%*s", LIST_NAME_LEN, current->DO_DM, LIST_NAME_LEN, current->DO_B, LIST_NAME_LEN, current->DO_H);
 		//假差
 		printf("%*s%*s%*s", LIST_NAME_LEN, current->LEAVE_DM, LIST_NAME_LEN, current->LEAVE_B, LIST_NAME_LEN, current->LEAVE_H);
-		
+
 		printf("\n");
 		//指標移動
 		current = current->next;
@@ -868,7 +902,7 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 		printf(" [1]請假系統\n");
 		printf(" [2]列印特定班表\n");
 		printf(" [3]列印工時表\n");
-		printf(" [4]輸出班表\n");
+		printf(" [4]輸出班表至csv檔\n");
 		printf(" [5]結束\n\n");
 		/////////////////////////////////////////////////////////////
 		do
@@ -942,7 +976,7 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 		case(4):
 		{
 			printf("輸出班表至csv檔...\n\n");
-			file_open(head);
+			file_open(head, year, month);
 
 			continue;
 		}
