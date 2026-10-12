@@ -639,9 +639,10 @@ void print_calendar_list_console(list* head, int year, int month)
 		return;
 	}
 
-	//建立標題
 	int i;
+	//建立標題
 	list_title(head, year, month);
+	//第一行
 	list_first_line();
 	dividing_line(160 + 30);
 	printf("\n");
@@ -877,12 +878,29 @@ void working_hours_daily(list* head)
 		{
 			if (strcmp(current->DS_F1, empolyee_filling[0]) == 0)
 			{
-				current->DS_F1_WORKING_HOURS += working_hours_per_day;
+				current->DS_F1_WORKING_HOURS = working_hours_per_day;
+			}
+			else
+			{
+				current->DS_F1_WORKING_HOURS = 0.0;
 			}
 			if (strcmp(current->DS_F2, empolyee_filling[1]) == 0)
 			{
-				current->DS_F2_WORKING_HOURS += working_hours_per_day;
+				current->DS_F2_WORKING_HOURS = working_hours_per_day;
 			}
+			else
+			{
+				current->DS_F2_WORKING_HOURS = 0.0;
+			}
+		}
+		//電槽分析
+		if (strcmp(current->DS_A, empolyee_analysis[0]) == 0)
+		{
+			current->DS_A_WORKING_HOURS = working_hours_per_day;
+		}
+		else
+		{
+			current->DS_A_WORKING_HOURS = 0.0;
 		}
 		//指標移動
 		current = current->next;
@@ -1100,18 +1118,18 @@ void total_working_days_calculate(list* head)
 		}
 
 		//充填1工作天數計算
-		if (strcmp(current->DS_F1, empolyee_filling) == 0)
+		if (strcmp(current->DS_F1, empolyee_filling[0]) == 0)
 		{
 			empolyee_filling_working_days[0]++;
 		}
 
 		//充填2工作天數計算
-		if (strcmp(current->DS_F2, empolyee_filling) == 0)
+		if (strcmp(current->DS_F2, empolyee_filling[1]) == 0)
 		{
 			empolyee_filling_working_days[1]++;
 		}
 		//電槽分析工作天數計算
-		if (strcmp(current->DS_A, empolyee_analysis) == 0)
+		if (strcmp(current->DS_A, empolyee_analysis[0]) == 0)
 		{
 			empolyee_analysis_working_days[0]++;
 		}
@@ -1207,26 +1225,41 @@ void leave_system(list* head)
 			current = current->next;
 
 
-		//建立標題
+		
 		int i;
+		//第一行
 		list_first_line();
-		dividing_line(160);
+		dividing_line(160 + 30);
 
 		printf("\n");
 		printf("%10s", " ");
 		for (i = 0; i < 5; i++)
-			printf("%10s%10s%10s", parts[0], parts[1], parts[2]);
-
+		{
+			printf("%*s", LIST_NAME_LEN, parts[0]);
+			printf("%*s%*s", LIST_NAME_LEN, parts[1], LIST_NAME_LEN, parts[2]);
+			if (i == 0)
+			{
+				printf("%*s", LIST_NAME_LEN, parts_filling[0]);
+				printf("%*s", LIST_NAME_LEN, parts_filling[1]);
+				printf("%*s", LIST_NAME_LEN, parts_analysis[0]);
+			}
+		}
 		printf("\n");
-		dividing_line(160);
+		dividing_line(160 + 30);
 		printf("\n");
 
-		printf("%2d/%2d%5s", current->month, current->day, current->week);
-		printf("%10s%10s%10s", current->DS_DM, current->DS_B, current->DS_H);
-		printf("%10s%10s%10s", current->ES_DM, current->ES_B, current->ES_H);
-		printf("%10s%10s%10s", current->NS_DM, current->NS_B, current->NS_H);
-		printf("%10s%10s%10s", current->DO_DM, current->DO_B, current->DO_H);
-		printf("%10s%10s%10s", current->LEAVE_DM, current->LEAVE_B, current->LEAVE_H);
+		//列印日期星期班別...
+		printf("%*d/%*d%5s", LIST_DATE_LEN % 3, current->month, LIST_DATE_LEN % 3, current->day, current->week);
+		//第一班
+		printf("%*s%*s%*s%*s%*s%*s", LIST_NAME_LEN, current->DS_DM, LIST_NAME_LEN, current->DS_B, LIST_NAME_LEN, current->DS_H, LIST_NAME_LEN, current->DS_F1, LIST_NAME_LEN, current->DS_F2, LIST_NAME_LEN, current->DS_A);
+		//第二班
+		printf("%*s%*s%*s", LIST_NAME_LEN, current->ES_DM, LIST_NAME_LEN, current->ES_B, LIST_NAME_LEN, current->ES_H);
+		//第三班
+		printf("%*s%*s%*s", LIST_NAME_LEN, current->NS_DM, LIST_NAME_LEN, current->NS_B, LIST_NAME_LEN, current->NS_H);
+		//輪休
+		printf("%*s%*s%*s", LIST_NAME_LEN, current->DO_DM, LIST_NAME_LEN, current->DO_B, LIST_NAME_LEN, current->DO_H);
+		//假差
+		printf("%*s%*s%*s", LIST_NAME_LEN, current->LEAVE_DM, LIST_NAME_LEN, current->LEAVE_B, LIST_NAME_LEN, current->LEAVE_H);
 		printf("\n");
 
 		printf("[0]DM or [1]Employee ==>");
@@ -1455,8 +1488,7 @@ void dividing_line(int cnt)
 
 void list_first_line()
 {
-	//printf("%5s%5s%30s%30s%30s%30s%30s\n", "Date", "Week", shift[0], shift[1], shift[2], "Day-off", "Leave");
-	printf("%*s%*s%*s%*s%*s%*s%*s\n"
+		printf("%*s%*s%*s%*s%*s%*s%*s\n"
 		, LIST_DATE_LEN, "日期"
 		, LIST_DATE_LEN, "星期"
 		, LIST_NAME_LEN * 6, shift[0]
