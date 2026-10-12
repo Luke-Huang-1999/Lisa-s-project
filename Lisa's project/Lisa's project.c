@@ -81,16 +81,18 @@ typedef struct data
 	struct data* next;
 }list;
 
-//char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
+char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
+char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
 char empolyee_filling[EMPLOYEE_FILLING][NAME_LEN] = { "充1", "充2" };
 char empolyee_analysis[EMPLOYEE_ANALYSIS][NAME_LEN] = { "分析" };
-//char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
-char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","傑哥","孟昌","宏龍","健忠" };
-char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
+//char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","傑哥","孟昌","宏龍","健忠" };
+//char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
 
 //char shift[3][15] = { "Day","Evening" ,"Night" };
 char shift[3][15] = { "第一班","第二班" ,"第三班" };
 char parts[3][15] = { "值班主管","一次鹽水","鹽酸" };
+char parts_filling[2][15] = { "充填1","充填2" };
+char parts_analysis[1][15] = { "電槽分析" };
 char all_week[7][5] = { "一","二","三" ,"四" ,"五" ,"六" ,"日" };
 
 float dm_working_hours[DM_NUMS] = { 0.0 };
@@ -562,17 +564,28 @@ list* create_calendar_list_console(int year, int month, int ds_dm_index, int ds_
 		{
 			strcpy(current->DS_F1, empolyee_filling[0]);
 		}
+		else
+		{
+			strcpy(current->DS_F1, " ");
+		}
 		//充填2控制
 		if (strcmp(current->DO_DM, dm_all[0]) != 0)
 		{
 			strcpy(current->DS_F2, empolyee_filling[1]);
+		}
+		else
+		{
+			strcpy(current->DS_F2, " ");
 		}
 		//電槽分析控制
 		if (strcmp(current->week, all_week[5]) != 0 && strcmp(current->week, all_week[6]) != 0)
 		{
 			strcpy(current->DS_A, empolyee_analysis[0]);
 		}
-
+		else
+		{
+			strcpy(current->DS_A, " ");
+		}
 
 		//指標控制
 		current = current->next;
@@ -596,29 +609,40 @@ void print_calendar_list_console(list* head, int year, int month)
 	int i;
 	list_title(head, year, month);
 	list_first_line();
-	dividing_line(160);
+	dividing_line(160 + 30);
 	printf("\n");
 	printf("%10s", " ");
 	for (i = 0; i < 5; i++)
 	{
-		printf("%*s%*s%*s"
-			, LIST_NAME_LEN, parts[0]
-			, LIST_NAME_LEN, parts[1]
-			, LIST_NAME_LEN, parts[2]);
+		printf("%*s", LIST_NAME_LEN, parts[0]);
+		printf("%*s%*s", LIST_NAME_LEN, parts[1], LIST_NAME_LEN, parts[2]);
+		if (i == 0)
+		{
+			printf("%*s", LIST_NAME_LEN, parts_filling[0]);
+			printf("%*s", LIST_NAME_LEN, parts_filling[1]);
+			printf("%*s", LIST_NAME_LEN, parts_analysis[0]);
+		}
 	}
 	printf("\n");
-	dividing_line(160);
+	dividing_line(160 + 30);
 	printf("\n");
 
 	list* current = head;
 	while (current != NULL)
 	{
+		//列印日期星期班別...
 		printf("%*d/%*d%5s", LIST_DATE_LEN % 3, current->month, LIST_DATE_LEN % 3, current->day, current->week);
-		printf("%*s%*s%*s", LIST_NAME_LEN, current->DS_DM, LIST_NAME_LEN, current->DS_B, LIST_NAME_LEN, current->DS_H);
+		//第一班
+		printf("%*s%*s%*s%*s%*s%*s", LIST_NAME_LEN, current->DS_DM, LIST_NAME_LEN, current->DS_B, LIST_NAME_LEN, current->DS_H, LIST_NAME_LEN, current->DS_F1, LIST_NAME_LEN, current->DS_F2, LIST_NAME_LEN, current->DS_A);
+		//第二班
 		printf("%*s%*s%*s", LIST_NAME_LEN, current->ES_DM, LIST_NAME_LEN, current->ES_B, LIST_NAME_LEN, current->ES_H);
+		//第三班
 		printf("%*s%*s%*s", LIST_NAME_LEN, current->NS_DM, LIST_NAME_LEN, current->NS_B, LIST_NAME_LEN, current->NS_H);
+		//輪休
 		printf("%*s%*s%*s", LIST_NAME_LEN, current->DO_DM, LIST_NAME_LEN, current->DO_B, LIST_NAME_LEN, current->DO_H);
+		//假差
 		printf("%*s%*s%*s", LIST_NAME_LEN, current->LEAVE_DM, LIST_NAME_LEN, current->LEAVE_B, LIST_NAME_LEN, current->LEAVE_H);
+		
 		printf("\n");
 		//指標移動
 		current = current->next;
@@ -821,7 +845,7 @@ void working_hours_daily(list* head)
 			{
 				current->DS_F1_WORKING_HOURS += working_hours_per_day;
 			}
-			if (strcmp(current->DS_F2, empolyee_filling[1] == 0))
+			if (strcmp(current->DS_F2, empolyee_filling[1]) == 0)
 			{
 				current->DS_F2_WORKING_HOURS += working_hours_per_day;
 			}
@@ -1401,7 +1425,7 @@ void list_first_line()
 	printf("%*s%*s%*s%*s%*s%*s%*s\n"
 		, LIST_DATE_LEN, "日期"
 		, LIST_DATE_LEN, "星期"
-		, LIST_NAME_LEN * 3, shift[0]
+		, LIST_NAME_LEN * 6, shift[0]
 		, LIST_NAME_LEN * 3, shift[1]
 		, LIST_NAME_LEN * 3, shift[2]
 		, LIST_NAME_LEN * 3, "輪休"
