@@ -77,6 +77,9 @@ typedef struct data
 	float LEAVE_B_WORKING_HOURS;
 	char LEAVE_H[NAME_LEN];
 	float LEAVE_H_WORKING_HOURS;
+	char LEAVE_F1[NAME_LEN];
+	char LEAVE_F2[NAME_LEN];
+	char LEAVE_A[NAME_LEN];
 	//char NAME_LIST[EMPLOYEE_NUMS + EMPLOYEE_FILLING + EMPLOYEE_ANALYSIS][NAME_LEN];//15
 	struct data* next;
 }list;
@@ -651,7 +654,7 @@ void print_calendar_list_console(list* head, int year, int month)
 	{
 		printf("%*s", LIST_NAME_LEN, parts[0]);
 		printf("%*s%*s", LIST_NAME_LEN, parts[1], LIST_NAME_LEN, parts[2]);
-		if (i == 0)
+		if (i == 0 || i == 3 || i == 4)
 		{
 			printf("%*s", LIST_NAME_LEN, parts_filling[0]);
 			printf("%*s", LIST_NAME_LEN, parts_filling[1]);
@@ -959,6 +962,7 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 			printf("請假系統...\n\n");
 
 			leave_system(head);
+			//leave_system_test_mode(head);
 			//列印月曆
 			print_calendar_list_console(head, year, month);
 			continue;
@@ -1182,20 +1186,34 @@ void total_working_hours_print(list* head)
 	int i;
 	for (i = 0; i < DM_NUMS; i++)
 	{
-		printf("DM ==>%7s  %.1f hours => %3d days\n"
+		//列印值班主管
+		printf("值班主管 ==>%6s  %.1f hours => %3d days\n"
 			, dm_all[i]
 			, dm_working_hours[i]
 			, dm_working_days[i]);
-		printf("B  ==>%7s  %.1f hours => %3d days\n"
+		//列印一次鹽水
+		printf("一次鹽水 ==>%6s  %.1f hours => %3d days\n"
 			, employee_all[2 * i]
 			, employee_working_hours[2 * i]
 			, employee_working_days[2 * i]);
-		printf("H  ==>%7s  %.1f hours => %3d days\n"
+		//列印鹽酸
+		printf("鹽酸     ==>%6s  %.1f hours => %3d days\n"
 			, employee_all[2 * i + 1]
 			, employee_working_hours[2 * i + 1]
 			, employee_working_days[2 * i + 1]);
-		printf("\n");
 	}
+	//列印充填1 和 充填2
+	for (i = 0; i < EMPLOYEE_FILLING; i++)
+	{
+		printf("充填%d    ==>%6s  %.1f hours => %3d days\n"
+			, i + 1
+			, empolyee_filling[i]
+			, empolyee_filling_working_hours[i]
+			, empolyee_filling_working_days[i]);
+	}
+	//列印電槽分析
+	printf("電槽分析 ==>%6s  %.1f hours => %3d days\n", empolyee_analysis[0], empolyee_analysis_working_hours[0], empolyee_analysis_working_days[0]);
+	printf("\n");
 }
 
 void leave_system(list* head)
@@ -1210,11 +1228,9 @@ void leave_system(list* head)
 	list* current = head;
 	int mode_index;
 	int leave_index;
-
 	while (leave_day != 0)
 	{
-		printf("請輸入請假日期(5號，則輸入 5；結束請假系統請輸入 0 )：\n");
-		printf("==> ");
+		printf("請輸入請假日期：(結束請輸入0)");
 		scanf("%d", &leave_day);
 		if (leave_day == 0)
 		{
@@ -1223,8 +1239,6 @@ void leave_system(list* head)
 		}
 		while (current->day != leave_day)
 			current = current->next;
-
-
 		
 		int i;
 		//第一行
@@ -1262,7 +1276,8 @@ void leave_system(list* head)
 		printf("%*s%*s%*s", LIST_NAME_LEN, current->LEAVE_DM, LIST_NAME_LEN, current->LEAVE_B, LIST_NAME_LEN, current->LEAVE_H);
 		printf("\n");
 
-		printf("[0]DM or [1]Employee ==>");
+		printf("[0]值班主管  [1]一次鹽水/鹽酸  [2]充填  [3]電槽分析\n");
+		printf("請輸入工作崗位：");
 		scanf("%d", &mode_index);
 
 		printf("請輸入請假人員姓名：");
@@ -1360,6 +1375,29 @@ void leave_system(list* head)
 					strcat(current->ES_H, current->NS_H);
 				}
 			}
+		}
+		else if (mode_index == 2)										//充填人員請假
+		{
+			for (i = 0; i < EMPLOYEE_FILLING; i++)
+				printf("[%d]%s ", i, empolyee_filling[i]);
+			printf("\n");
+			scanf("%d", &leave_index);
+
+			if (leave_index == 0)
+			{
+				strcpy(current->LEAVE_F1, current->DS_F1);
+				strcpy(current->DS_F1, " ");
+			}
+			if (leave_index == 1)
+			{
+				strcpy(current->LEAVE_F2, current->DS_F2);
+				strcpy(current->DS_F2, " ");
+			}
+		}
+		else if (mode_index == 3)
+		{
+			strcpy(current->LEAVE_A, current->DS_A);
+			strcpy(current->DS_A, " ");
 		}
 		else
 		{
@@ -1494,8 +1532,8 @@ void list_first_line()
 		, LIST_NAME_LEN * 6, shift[0]
 		, LIST_NAME_LEN * 3, shift[1]
 		, LIST_NAME_LEN * 3, shift[2]
-		, LIST_NAME_LEN * 3, "輪休"
-		, LIST_NAME_LEN * 3, "假差");
+		, LIST_NAME_LEN * 6, "輪休"
+		, LIST_NAME_LEN * 6, "假差");
 }
 
 void test_hours(list* head)
