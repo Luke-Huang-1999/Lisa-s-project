@@ -71,6 +71,9 @@ typedef struct data
 	float DO_B_WORKING_HOURS;
 	char DO_H[NAME_LEN];
 	float DO_H_WORKING_HOURS;
+	char DO_F1[NAME_LEN];
+	char DO_F2[NAME_LEN];
+	char DO_A[NAME_LEN];
 	char LEAVE_DM[NAME_LEN];
 	float LEAVE_DM_WORKING_HOURS;
 	char LEAVE_B[NAME_LEN];
@@ -86,8 +89,8 @@ typedef struct data
 
 char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
 char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
-char empolyee_filling[EMPLOYEE_FILLING][NAME_LEN] = { "充1", "充2" };
-char empolyee_analysis[EMPLOYEE_ANALYSIS][NAME_LEN] = { "分析" };
+char employee_filling[EMPLOYEE_FILLING][NAME_LEN] = { "充1", "充2" };
+char employee_analysis[EMPLOYEE_ANALYSIS][NAME_LEN] = { "分析" };
 //char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","傑哥","孟昌","宏龍","健忠" };
 //char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
 
@@ -100,13 +103,13 @@ char all_week[7][5] = { "一","二","三" ,"四" ,"五" ,"六" ,"日" };
 
 float dm_working_hours[DM_NUMS] = { 0.0 };
 float employee_working_hours[EMPLOYEE_NUMS] = { 0.0 };
-float empolyee_filling_working_hours[EMPLOYEE_FILLING] = { 0.0 };
-float empolyee_analysis_working_hours[EMPLOYEE_ANALYSIS] = { 0.0 };
+float employee_filling_working_hours[EMPLOYEE_FILLING] = { 0.0 };
+float employee_analysis_working_hours[EMPLOYEE_ANALYSIS] = { 0.0 };
 
 int dm_working_days[DM_NUMS] = { 0 };
 int employee_working_days[EMPLOYEE_NUMS] = { 0 };
-int empolyee_filling_working_days[EMPLOYEE_FILLING] = { 0.0 };
-int empolyee_analysis_working_days[EMPLOYEE_ANALYSIS] = { 0.0 };
+int employee_filling_working_days[EMPLOYEE_FILLING] = { 0.0 };
+int employee_analysis_working_days[EMPLOYEE_ANALYSIS] = { 0.0 };
 
 void receive_data(int* year, int* month, int* ds_dm_index, int* ds_dm_workday);
 //(回傳當年當月的1號星期幾)蔡勒公式(年份, 月份)
@@ -260,7 +263,7 @@ void schedule_to_csv(list* head, FILE* fptr, int year, int month)
 	int ROC_year = year - 1911;
 	fprintf(fptr, "XXXX課%4d年%2d月份值班表--正式班表\n", ROC_year, month);
 	//第二行
-	fprintf(fptr, "Date,week,,,,,,%s,,,%s,,,%s,,,Day off,,,Leave\n", shift[0], shift[1], shift[2]);
+	fprintf(fptr, "Date,week,,,,,,%s,,,%s,,,%s,,,,,,輪休,,,,,,假差\n", shift[0], shift[1], shift[2]);
 	
 	//第三行
 	//第一班
@@ -282,13 +285,17 @@ void schedule_to_csv(list* head, FILE* fptr, int year, int month)
 		{
 			fprintf(fptr, ",%s", parts[j]);
 		}
+		if (i == 2 || i == 3)
+		{
+			fprintf(fptr, ",%s,%s,%s", parts_filling[0], parts_filling[1], parts_analysis[0]);
+		}
 	}
 
 	fprintf(fptr, "\n");
 	//第四行到結束
 	while (current != NULL)
 	{
-		fprintf(fptr, "%d/%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+		fprintf(fptr, "%d/%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
 			current->month,
 			current->day,
 			current->week,
@@ -307,15 +314,24 @@ void schedule_to_csv(list* head, FILE* fptr, int year, int month)
 			current->DO_DM,
 			current->DO_B,
 			current->DO_H,
+			current->DO_F1,
+			current->DO_F2,
+			current->DO_A,
 			current->LEAVE_DM,
 			current->LEAVE_B,
-			current->LEAVE_H);
+			current->LEAVE_H,
+			current->LEAVE_F1,
+			current->LEAVE_F2,
+			current->LEAVE_A);
 		current = current->next;
 	}
 }
 
 void timesheet_to_csv(list* head, FILE* fptr)
 {
+	//工時歸零
+	working_hour_zero();
+	working_days_zero();
 	//計算不含請假人員工時
 	total_working_hours_calculate(head);
 	//加班人員工時新增
@@ -342,10 +358,10 @@ void timesheet_to_csv(list* head, FILE* fptr)
 			//充填1 and 充填2
 			for (j = 0; j < EMPLOYEE_FILLING; j++)
 			{
-				fprintf(fptr, "%s,%3.1f,%d\n", empolyee_filling[j], empolyee_filling_working_hours[j], empolyee_filling_working_days[j]);
+				fprintf(fptr, "%s,%3.1f,%d\n", employee_filling[j], employee_filling_working_hours[j], employee_filling_working_days[j]);
 			}
 			//電槽分析
-			fprintf(fptr, "%s,%3.1f,%d\n", empolyee_analysis[0], empolyee_analysis_working_hours[0], empolyee_analysis_working_days[0]);
+			fprintf(fptr, "%s,%3.1f,%d\n", employee_analysis[0], employee_analysis_working_hours[0], employee_analysis_working_days[0]);
 		}
 		else
 		{
@@ -595,33 +611,41 @@ list* create_calendar_list_console(int year, int month, int ds_dm_index, int ds_
 	current = head;
 	while (current != NULL)
 	{
-
+		strcpy(current->LEAVE_F1, " ");
+		strcpy(current->LEAVE_F2, " ");
+		strcpy(current->LEAVE_A, " ");
+		strcpy(current->DO_F1, " ");
+		strcpy(current->DO_F2, " ");
+		strcpy(current->DO_A, " ");
 		//充填1控制
-		if (strcmp(current->DO_DM, dm_all[3]) != 0)
+		if (strcmp(current->DO_DM, dm_all[3]) != 0)//上班
 		{
-			strcpy(current->DS_F1, empolyee_filling[0]);
+			strcpy(current->DS_F1, employee_filling[0]);
 		}
 		else
 		{
 			strcpy(current->DS_F1, " ");
+			strcpy(current->DO_F1, employee_filling[0]);
 		}
 		//充填2控制
-		if (strcmp(current->DO_DM, dm_all[0]) != 0)
+		if (strcmp(current->DO_DM, dm_all[0]) != 0)//上班
 		{
-			strcpy(current->DS_F2, empolyee_filling[1]);
+			strcpy(current->DS_F2, employee_filling[1]);
 		}
 		else
 		{
 			strcpy(current->DS_F2, " ");
+			strcpy(current->DO_F2, employee_filling[1]);
 		}
 		//電槽分析控制
 		if (strcmp(current->week, all_week[5]) != 0 && strcmp(current->week, all_week[6]) != 0)
 		{
-			strcpy(current->DS_A, empolyee_analysis[0]);
+			strcpy(current->DS_A, employee_analysis[0]);
 		}
 		else
 		{
 			strcpy(current->DS_A, " ");
+			strcpy(current->DO_A, employee_analysis[0]);
 		}
 
 		//指標控制
@@ -629,8 +653,6 @@ list* create_calendar_list_console(int year, int month, int ds_dm_index, int ds_
 	}
 
 	working_hours_daily(head);
-
-
 	return head;
 }
 
@@ -647,7 +669,7 @@ void print_calendar_list_console(list* head, int year, int month)
 	list_title(head, year, month);
 	//第一行
 	list_first_line();
-	dividing_line(160 + 30);
+	dividing_line(160 + 30+60);
 	printf("\n");
 	printf("%10s", " ");
 	for (i = 0; i < 5; i++)
@@ -662,7 +684,7 @@ void print_calendar_list_console(list* head, int year, int month)
 		}
 	}
 	printf("\n");
-	dividing_line(160 + 30);
+	dividing_line(160 + 30+60);
 	printf("\n");
 
 	list* current = head;
@@ -677,9 +699,9 @@ void print_calendar_list_console(list* head, int year, int month)
 		//第三班
 		printf("%*s%*s%*s", LIST_NAME_LEN, current->NS_DM, LIST_NAME_LEN, current->NS_B, LIST_NAME_LEN, current->NS_H);
 		//輪休
-		printf("%*s%*s%*s", LIST_NAME_LEN, current->DO_DM, LIST_NAME_LEN, current->DO_B, LIST_NAME_LEN, current->DO_H);
+		printf("%*s%*s%*s%*s%*s%*s", LIST_NAME_LEN, current->DO_DM, LIST_NAME_LEN, current->DO_B, LIST_NAME_LEN, current->DO_H, LIST_NAME_LEN, current->DO_F1, LIST_NAME_LEN, current->DO_F2, LIST_NAME_LEN, current->DO_A);
 		//假差
-		printf("%*s%*s%*s", LIST_NAME_LEN, current->LEAVE_DM, LIST_NAME_LEN, current->LEAVE_B, LIST_NAME_LEN, current->LEAVE_H);
+		printf("%*s%*s%*s%*s%*s%*s", LIST_NAME_LEN, current->LEAVE_DM, LIST_NAME_LEN, current->LEAVE_B, LIST_NAME_LEN, current->LEAVE_H, LIST_NAME_LEN, current->LEAVE_F1, LIST_NAME_LEN, current->LEAVE_F2, LIST_NAME_LEN, current->LEAVE_A);
 
 		printf("\n");
 		//指標移動
@@ -879,7 +901,7 @@ void working_hours_daily(list* head)
 		}
 		//充填1+充填2控制
 		{
-			if (strcmp(current->DS_F1, empolyee_filling[0]) == 0)
+			if (strcmp(current->DS_F1, employee_filling[0]) == 0)
 			{
 				current->DS_F1_WORKING_HOURS = working_hours_per_day;
 			}
@@ -887,7 +909,7 @@ void working_hours_daily(list* head)
 			{
 				current->DS_F1_WORKING_HOURS = 0.0;
 			}
-			if (strcmp(current->DS_F2, empolyee_filling[1]) == 0)
+			if (strcmp(current->DS_F2, employee_filling[1]) == 0)
 			{
 				current->DS_F2_WORKING_HOURS = working_hours_per_day;
 			}
@@ -897,7 +919,7 @@ void working_hours_daily(list* head)
 			}
 		}
 		//電槽分析
-		if (strcmp(current->DS_A, empolyee_analysis[0]) == 0)
+		if (strcmp(current->DS_A, employee_analysis[0]) == 0)
 		{
 			current->DS_A_WORKING_HOURS = working_hours_per_day;
 		}
@@ -1060,19 +1082,19 @@ void total_working_hours_calculate(list* head)
 		}
 
 		//充填1工時計算
-		if (strcmp(current->DS_F1, empolyee_filling[0]) == 0)
+		if (strcmp(current->DS_F1, employee_filling[0]) == 0)
 		{
-			empolyee_filling_working_hours[0] += current->DS_F1_WORKING_HOURS;
+			employee_filling_working_hours[0] += current->DS_F1_WORKING_HOURS;
 		}
 		//充填2工時計算
-		if (strcmp(current->DS_F2, empolyee_filling[1]) == 0)
+		if (strcmp(current->DS_F2, employee_filling[1]) == 0)
 		{
-			empolyee_filling_working_hours[1] += current->DS_F2_WORKING_HOURS;
+			employee_filling_working_hours[1] += current->DS_F2_WORKING_HOURS;
 		}
 		//電槽分析工時計算
-		if (strcmp(current->DS_A, empolyee_analysis[0]) == 0)
+		if (strcmp(current->DS_A, employee_analysis[0]) == 0)
 		{
-			empolyee_analysis_working_hours[0] += current->DS_A_WORKING_HOURS;
+			employee_analysis_working_hours[0] += current->DS_A_WORKING_HOURS;
 		}
 
 
@@ -1122,20 +1144,20 @@ void total_working_days_calculate(list* head)
 		}
 
 		//充填1工作天數計算
-		if (strcmp(current->DS_F1, empolyee_filling[0]) == 0)
+		if (strcmp(current->DS_F1, employee_filling[0]) == 0)
 		{
-			empolyee_filling_working_days[0]++;
+			employee_filling_working_days[0]++;
 		}
 
 		//充填2工作天數計算
-		if (strcmp(current->DS_F2, empolyee_filling[1]) == 0)
+		if (strcmp(current->DS_F2, employee_filling[1]) == 0)
 		{
-			empolyee_filling_working_days[1]++;
+			employee_filling_working_days[1]++;
 		}
 		//電槽分析工作天數計算
-		if (strcmp(current->DS_A, empolyee_analysis[0]) == 0)
+		if (strcmp(current->DS_A, employee_analysis[0]) == 0)
 		{
-			empolyee_analysis_working_days[0]++;
+			employee_analysis_working_days[0]++;
 		}
 
 		//指標移動
@@ -1156,10 +1178,10 @@ void working_hour_zero()
 	//充填1+2
 	for (i = 0; i < EMPLOYEE_FILLING; i++)
 	{
-		empolyee_filling_working_hours[i] = 0.0f;
+		employee_filling_working_hours[i] = 0.0f;
 	}
 	//電槽分析
-	empolyee_analysis_working_hours[0] = 0.0f;
+	employee_analysis_working_hours[0] = 0.0f;
 }
 
 void working_days_zero()
@@ -1175,10 +1197,10 @@ void working_days_zero()
 	//充填1+2
 	for (i = 0; i < EMPLOYEE_FILLING; i++)
 	{
-		empolyee_filling_working_days[i] = 0;
+		employee_filling_working_days[i] = 0;
 	}
 	//電槽分析
-	empolyee_analysis_working_days[0] = 0;
+	employee_analysis_working_days[0] = 0;
 }
 
 void total_working_hours_print(list* head)
@@ -1207,12 +1229,12 @@ void total_working_hours_print(list* head)
 	{
 		printf("充填%d    ==>%6s  %.1f hours => %3d days\n"
 			, i + 1
-			, empolyee_filling[i]
-			, empolyee_filling_working_hours[i]
-			, empolyee_filling_working_days[i]);
+			, employee_filling[i]
+			, employee_filling_working_hours[i]
+			, employee_filling_working_days[i]);
 	}
 	//列印電槽分析
-	printf("電槽分析 ==>%6s  %.1f hours => %3d days\n", empolyee_analysis[0], empolyee_analysis_working_hours[0], empolyee_analysis_working_days[0]);
+	printf("電槽分析 ==>%6s  %.1f hours => %3d days\n", employee_analysis[0], employee_analysis_working_hours[0], employee_analysis_working_days[0]);
 	printf("\n");
 }
 
@@ -1379,7 +1401,7 @@ void leave_system(list* head)
 		else if (mode_index == 2)										//充填人員請假
 		{
 			for (i = 0; i < EMPLOYEE_FILLING; i++)
-				printf("[%d]%s ", i, empolyee_filling[i]);
+				printf("[%d]%s ", i, employee_filling[i]);
 			printf("\n");
 			scanf("%d", &leave_index);
 
