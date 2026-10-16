@@ -87,12 +87,12 @@ typedef struct data
 	struct data* next;
 }list;
 
-char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
-char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
-char employee_filling[EMPLOYEE_FILLING][NAME_LEN] = { "充1", "充2" };
-char employee_analysis[EMPLOYEE_ANALYSIS][NAME_LEN] = { "分析" };
-//char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","傑哥","孟昌","宏龍","健忠" };
-//char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
+//char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "小新","廣志" ,"小葵","小白","風間","阿呆","妮妮","正男" };
+//char dm_all[DM_NUMS][NAME_LEN] = { "維尼" ,"小豬","屹耳","羅賓" };
+char employee_filling[EMPLOYEE_FILLING][NAME_LEN] = { "侑助", "寶元" };
+char employee_analysis[EMPLOYEE_ANALYSIS][NAME_LEN] = { "虹鈞" };
+char employee_all[EMPLOYEE_NUMS][NAME_LEN] = { "尚鴻","朝鑫" ,"訓嘉","總為","孟昌","傑哥","宏龍","健忠" };
+char dm_all[DM_NUMS][NAME_LEN] = { "群諭" ,"杰宏","鵬銘","紋性" };
 
 //char shift[3][15] = { "Day","Evening" ,"Night" };
 char shift[3][15] = { "第一班","第二班" ,"第三班" };
@@ -937,7 +937,7 @@ void operation_system(list* head, int* ds_dm_index, int* ds_dm_workday)
 	int mode;
 	int year = 2026;
 	int month = 1;
-	printf("歡迎進入熊熊班表系統 版本號:1.0\n\n");
+	printf("歡迎進入維尼班表系統 版本號:1.0\n\n");
 	while (1)
 	{
 		printf(" 操作命令表：\n");
